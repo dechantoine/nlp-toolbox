@@ -1,7 +1,11 @@
 import pandas as pd
 
 from metaphone import doublemetaphone
-from Levenshtein import distance
+import Levenshtein
+
+from typing import Literal
+
+distance_functions = Literal["double_metaphone", "levenshtein"]
 
 def distance_double_metaphone(word1, word2):
     """Compute the distance between two words using the Double Metaphone algorithm
@@ -17,11 +21,24 @@ def distance_double_metaphone(word1, word2):
     for uni1 in doublemetaphone(word1):
         for uni2 in doublemetaphone(word2):
             if len(uni1) > 0 and len(uni2) > 0:
-                distances.append(distance(uni1, uni2))
+                distances.append(Levenshtein.distance(uni1, uni2))
     return sum(distances)/len(distances)
 
 
-def compute_misspelled_words(voc, distance_func, threshold=1):
+def distance_levenshtein(word1, word2):
+    """Compute the distance between two words using the Levenshtein algorithm
+
+        Args:
+            word1(str): First word
+            word2(str): Second word
+
+        Returns:
+            distance(float): Distance between the two words
+    """
+    return Levenshtein.distance(word1, word2)
+
+
+def compute_misspelled_words(voc, method: distance_functions = "levenshtein", threshold=1):
     """Compute misspelled words.
 
         Args:
@@ -32,6 +49,14 @@ def compute_misspelled_words(voc, distance_func, threshold=1):
         Returns:
             misspelled_words(dict): Dictionary of (supposedly) correct words with their closest mispelled words
     """
+
+    if method not in distance_functions:
+        raise ValueError("Invalid method. Expected one of: %s" % distance_functions)
+    elif method == "double_metaphone":
+        distance_func = distance_double_metaphone
+    elif method == "levenshtein":
+        distance_func = distance_levenshtein
+
     distances = [[voc[i],
                   voc[j],
                   distance_func(voc[i],
