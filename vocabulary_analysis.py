@@ -3,12 +3,13 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm
 
-def compute_closest_words(voc1, voc2=None):
+def compute_closest_words(voc1, voc2=None, threshold=None):
     """Compute closest words.
 
         Args:
             voc1(array-like): Array of words
             voc2(array-like): Array of words (voc1 is compared to voc2 if provided)
+            threshold(float): Maximum distance between s1 and s2, that is considered as a result. If the distance is bigger than score_cutoff, score_cutoff + 1 is returned instead
 
         Returns:
             closest_words(pd.DataFrame): DataFrame of the closest word from voc1 in voc1 (voc2) with associated distance
@@ -22,7 +23,8 @@ def compute_closest_words(voc1, voc2=None):
     distances = np.array([[voc1[i],
                            voc2[j],
                            distance_func(voc1[i],
-                                         voc2[j])]
+                                         voc2[j],
+                                         score_cutoff=threshold)]
                           for j in tqdm(range(len(voc1)))
                           for i in range(j if np.array_equal(voc1, voc2)
                                          else len(voc2))]
