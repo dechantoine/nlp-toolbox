@@ -1,6 +1,7 @@
 from Levenshtein import distance
 import numpy as np
 import pandas as pd
+from tqdm import tqdm
 
 def compute_closest_words(voc1, voc2=None):
     """Compute closest words.
@@ -18,19 +19,21 @@ def compute_closest_words(voc1, voc2=None):
 
     distance_func = distance
 
-    distances = [[voc1[i],
-                  voc2[j],
-                  distance_func(voc1[i],
-                                voc2[j])]
-                 for j in range(len(voc1))
-                 for i in range(j if np.array_equal(voc1, voc2)
-                                else len(voc2))]
+    distances = np.array([[voc1[i],
+                           voc2[j],
+                           distance_func(voc1[i],
+                                         voc2[j])]
+                          for j in tqdm(range(len(voc1)))
+                          for i in range(j if np.array_equal(voc1, voc2)
+                                         else len(voc2))]
+                         )
 
-    closest_words = (pd.DataFrame(data=distances,
-                                 columns=["word1", "word2", "distance"])
-                    .sort_values(by=["word1", "distance"],
-                                 ascending=True)
-                    .drop_duplicates(subset=["word1"])
-                    )
+    closest_words = (pd.DataFrame(data=np.concatenate((distances, distances[:, [1, 0, 2]])),
+                                  columns=["word1", "word2", "distance"])
+                     .sort_values(by=["word1", "distance"],
+                                  ascending=True)
+                     .drop_duplicates(subset=["word1"])
+                     .reset_index(drop=True)
+                     )
 
     return closest_words
