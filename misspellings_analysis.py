@@ -43,7 +43,7 @@ def compute_misspelled_words(voc, method: distance_functions = "levenshtein", th
 
         Args:
             voc(array-like): Array of words sort by frequency
-            distance_func(function): Function to compute the distance between two words
+            method(function): Function to compute the distance between two words
             threshold(float): Threshold to determine if a word is misspelled. Depends on the distance function used.
 
         Returns:
